@@ -9,9 +9,9 @@ import java.lang.reflect.Modifier;
 
 public class Clazz extends Closs {
 
-    int intValue;
-    String stringValue;
-    Account objectValue;
+    private int intValue;
+    private String stringValue;
+    private Account objectValue;
 
     public Clazz(int intValue, String stringValue, Account objectValue) {
         super();
