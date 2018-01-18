@@ -129,6 +129,8 @@ public class Clazz extends Closs {
             sMethods
                     .append("    ")
                     .append(modifiers)
+                    .append(returnType)
+                    .append(" ")
                     .append(name)
                     .append(" (")
                     .append(sParams)
