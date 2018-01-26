@@ -7,7 +7,7 @@ public class ParallelTest {
         Account lupa = new Account("Lupa",300);
         Account pupa = new Account("Pupa", 300);
 
-        AccountManager buhgalteriya1 = new AccountManager(lupa, pupa, 300);
+        AccountManager buhgalteriya1 = new AccountManager(lupa, pupa, 300); //лок по аккаунтам
         AccountManager buhgalteriya2 = new AccountManager(lupa, pupa, 200);
         AccountManager buhgalteriya3 = new AccountManager(pupa, lupa, 100);
 
