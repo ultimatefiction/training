@@ -12,8 +12,8 @@ public class RRobot {
 
     public static void main(String[] args) {
 
-        int charge = 30;
-        int maxLegs = 4;
+        int charge = 4;
+        int maxLegs = 2;
         Locker locker = new Locker(maxLegs);
         CountDownLatch latch = new CountDownLatch(maxLegs);
 
