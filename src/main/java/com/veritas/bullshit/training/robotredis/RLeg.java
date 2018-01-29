@@ -26,6 +26,7 @@ public class RLeg extends Thread {
         synchronized (locker) {
             if (locker.get() == this.name) {
                 set.add(count, name + "-" + count + "\n");
+                System.out.print(name + "-" + count + "\n");
                 locker.next();
                 locker.notifyAll();
             } else {

@@ -12,8 +12,8 @@ public class RRobot {
 
     public static void main(String[] args) {
 
-        int charge = 10;
-        int maxLegs = 2;
+        int charge = 30;
+        int maxLegs = 4;
         Locker locker = new Locker(maxLegs);
         CountDownLatch latch = new CountDownLatch(maxLegs);
 
@@ -24,6 +24,8 @@ public class RRobot {
                 .setDatabase(0);
         RedissonClient client = Redisson.create(config);
         RScoredSortedSet<String> set = client.getScoredSortedSet("lines");
+        set.clear();
+        set.add(100, "This is our set!");
 
         IntStream.rangeClosed(1, maxLegs).forEach(i -> new RLeg(i, charge, locker, set, latch).start());
 
@@ -36,6 +38,7 @@ public class RRobot {
         set.readAll().forEach(System.out::print);
 
         client.shutdown();
+        CheckingClass.check();
 
     }
 
