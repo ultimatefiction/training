@@ -36,7 +36,7 @@ public class BunnyLauncher {
 
         new BunnyRecorder(max, latch).run();
 
-        System.out.print("Publishing redis set's contents...\n========");
+        System.out.print("Publishing redis set's contents...\n========\n");
         set.readAll().forEach(System.out::print);
 
         client.shutdown();

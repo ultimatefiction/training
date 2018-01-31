@@ -22,7 +22,6 @@ public class BunnyRecorder extends Thread {
     private RedissonClient client;
     private RScoredSortedSet<String> set;
 
-    private Connection connection;
     private Channel channel;
     private BunnyConsumer consumer;
 
@@ -50,7 +49,7 @@ public class BunnyRecorder extends Thread {
         factory.setUsername(LOGIN);
         factory.setPassword(PASSWORD);
         try {
-            this.connection = factory.newConnection();
+            Connection connection = factory.newConnection();
             this.channel = connection.createChannel();
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
             this.consumer = new BunnyConsumer(channel);
