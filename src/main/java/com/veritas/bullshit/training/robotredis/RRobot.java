@@ -1,16 +1,21 @@
 package com.veritas.bullshit.training.robotredis;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import org.redisson.Redisson;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 public class RRobot {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, TimeoutException {
 
         int charge = 4;
         int maxLegs = 2;
@@ -25,9 +30,14 @@ public class RRobot {
         RedissonClient client = Redisson.create(config);
         RScoredSortedSet<String> set = client.getScoredSortedSet("lines");
         set.clear();
-        set.add(100, "This is our set!");
 
-        IntStream.rangeClosed(1, maxLegs).forEach(i -> new RLeg(i, charge, locker, set, latch).start());
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        factory.setUsername("msxfusr");
+        factory.setPassword("msxfpwd");
+        Connection connection = factory.newConnection();
+
+        IntStream.rangeClosed(1, maxLegs).forEach(i -> new RLeg(i, charge, locker, set, connection, latch).start());
 
         try {
             latch.await();
@@ -38,7 +48,6 @@ public class RRobot {
         set.readAll().forEach(System.out::print);
 
         client.shutdown();
-        CheckingClass.check();
 
     }
 

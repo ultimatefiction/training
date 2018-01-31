@@ -41,6 +41,9 @@ public class Receiver extends Thread {
             };
 
             channel.basicConsume(queueName, true, consumer);
+
+            channel.close();
+            connection.close();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }
