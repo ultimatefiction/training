@@ -3,6 +3,7 @@ package com.veritas.bullshit.training.rabbies;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.GetResponse;
 import org.redisson.Redisson;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RScoredSortedSet;
@@ -65,25 +66,20 @@ public class Receiver extends Thread {
 
     private void receive() {
         try {
-            channel.basicConsume(queueName, true, handler);
+            //channel.basicConsume(queueName, true, handler);
+            GetResponse getResponse = channel.basicGet(queueName, true);
+            String message = new String(getResponse.getBody(), "UTF-8");
+            System.out.print(String.format("[<] Received report from %s: %s\n", queueName, message));
+            String[] things = message.split(" --> ");
+            System.out.print(String.format("[i] Extracted score (%s)\n", things[1]));
+            set.add(Integer.parseInt(things[1]), message);
+            System.out.print(String.format("[v] Message recorded to redis set '%s': %s\n", setName, message));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void exit() throws IOException, TimeoutException {
-        //костыль, призванный предовтратить закрытие редиса прежде чем все сообщения будут из очереди
-        //почему так получается, мне до сих пор непонятно
-        //судя по выводу, сперва выполняютс все цикл в run() продолжается, не дожидаясь пока сообщение из очереди будет должным образом обработано
-        //выполнив все вызовы basicConsume, он переходит в exit(), и закрывает клиент редиса (?)
-        //успевают записать в редис данные примерно два сообщения +-
-        //как заставить его выполнять всё последовательно? или это такая фича?
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         channel.close();
         connection.close();
         client.shutdown();
@@ -96,7 +92,7 @@ public class Receiver extends Thread {
         try {
             init();
             for (int i=0; i<max; i++) {
-                System.out.print(String.format("[i] Attempting to receive #%s\n", i));
+                System.out.print(String.format("[i] Attempting to receive #%s\n", i+1));
                 receive();
             }
             exit();

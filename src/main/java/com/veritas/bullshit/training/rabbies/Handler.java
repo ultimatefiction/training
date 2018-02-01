@@ -27,14 +27,14 @@ public class Handler extends DefaultConsumer {
 
     @Override
     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-        //lock.lock();
+        lock.lock();
         String message = new String(body, "UTF-8");
         System.out.print(String.format("[<] Received report from %s: %s\n", queueName, message));
         String[] things = message.split(" --> ");
         System.out.print(String.format("[i] Extracted score (%s)\n", things[1]));
         set.add(Integer.parseInt(things[1]), message);
         System.out.print(String.format("[v] Message recorded to redis set '%s': %s\n", setName, message));
-        //lock.unlock();
+        lock.unlock();
     }
 
 }
