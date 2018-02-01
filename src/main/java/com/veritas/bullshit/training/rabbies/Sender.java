@@ -45,9 +45,9 @@ public class Sender extends Thread {
     private void process() throws IOException, InterruptedException {
         synchronized (lock) {
             if (lock.getCurrent() == id) {
-                String message = String.format("%s --> %s\n", id, lock.getState());
+                String message = String.format("%s --> %s", id, lock.getState());
                 channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
-                System.out.print(String.format("[>] Sent report to %s: %s", QUEUE_NAME, message));
+                System.out.print(String.format("[>] Sent report to %s: %s\n", QUEUE_NAME, message));
                 lock.inc();
                 lock.next();
                 lock.notifyAll();

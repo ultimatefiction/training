@@ -8,6 +8,7 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import org.redisson.Redisson;
+import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -54,9 +55,10 @@ public class Receiver extends Thread {
                 .setDatabase(0);
         this.client = Redisson.create(config);
         this.set = client.getScoredSortedSet(SET_NAME);
+        RReadWriteLock rwlock = client.getReadWriteLock("setLock");
         set.clear();
 
-        handler = new Handler(channel, QUEUE_NAME, SET_NAME, set);
+        handler = new Handler(channel, QUEUE_NAME, SET_NAME, set, rwlock);
 
         System.out.print("[o] Receiver is initialized\n");
     }
@@ -70,6 +72,14 @@ public class Receiver extends Thread {
     }
 
     private void exit() throws IOException, TimeoutException {
+        try {
+            Thread.sleep(3000); //сорри.
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.print(String.format("[^] Printing the contents of the redis set '%s':\n", SET_NAME));
+        set.readAll().forEach(System.out::println);
+
         channel.close();
         connection.close();
         client.shutdown();
@@ -82,6 +92,7 @@ public class Receiver extends Thread {
         try {
             init();
             for (int i=0; i<max; i++) {
+                System.out.print(String.format("[i] Attempting to receive #%s\n", i));
                 receive();
             }
             exit();

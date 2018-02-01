@@ -7,8 +7,8 @@ public class Launcher {
 
     public static void main(String[] args) {
 
-        int senders = 3;
-        int max = 9;
+        int senders = 2;
+        int max = 4;
         Lock lock = new Lock(senders);
         CountDownLatch latch = new CountDownLatch(senders);
 
