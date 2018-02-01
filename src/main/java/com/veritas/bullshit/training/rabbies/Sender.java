@@ -18,27 +18,32 @@ public class Sender extends Thread {
     private Connection connection;
     private Channel channel;
 
-    private final String QUEUE_NAME = "sendingQueue";
-    private final String HOST = "localhost";
-    private final String LOGIN = "msxfusr";
-    private final String PASSWORD = "msxfpwd";
+    private String queueName;
+    private String host;
+    private String login;
+    private String password;
 
 
-    Sender(int id, int max, Lock lock, CountDownLatch latch) {
+    Sender(int id, int max, Lock lock, CountDownLatch latch, RConfig rConfig) {
         this.id = id;
         this.max = max;
         this.lock = lock;
         this.latch = latch;
+
+        queueName = rConfig.getQueueName();
+        host = rConfig.getHost();
+        login = rConfig.getLogin();
+        password = rConfig.getPassword();
     }
 
     private void init() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(HOST);
-        factory.setUsername(LOGIN);
-        factory.setPassword(PASSWORD);
+        factory.setHost(host);
+        factory.setUsername(login);
+        factory.setPassword(password);
         connection = factory.newConnection();
         channel = connection.createChannel();
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        channel.queueDeclare(queueName, false, false, false, null);
         System.out.print(String.format("[o] Sender #%s is initialized\n", id));
     }
 
@@ -46,8 +51,8 @@ public class Sender extends Thread {
         synchronized (lock) {
             if (lock.getCurrent() == id) {
                 String message = String.format("%s --> %s", id, lock.getState());
-                channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
-                System.out.print(String.format("[>] Sent report to %s: %s\n", QUEUE_NAME, message));
+                channel.basicPublish("", queueName, null, message.getBytes());
+                System.out.print(String.format("[>] Sent report to %s: %s\n", queueName, message));
                 lock.inc();
                 lock.next();
                 lock.notifyAll();

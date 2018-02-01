@@ -1,12 +1,8 @@
 package com.veritas.bullshit.training.rabbies;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 import org.redisson.Redisson;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RScoredSortedSet;
@@ -15,7 +11,6 @@ import org.redisson.config.Config;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.IntStream;
 
 public class Receiver extends Thread {
 
@@ -28,58 +23,55 @@ public class Receiver extends Thread {
     private RedissonClient client;
     private RScoredSortedSet<String> set;
 
-    private final String QUEUE_NAME = "sendingQueue";
-    private final String SET_NAME = "senderMessages";
-    private final String ADDRESS = "127.0.0.1:6379";;
-    private final String HOST = "localhost";
-    private final String LOGIN = "msxfusr";
-    private final String PASSWORD = "msxfpwd";
+    private String queueName;
+    private String host;
+    private String login;
+    private String setName;
+    private String address;
+    private String password;
 
-    Receiver(int max) {
+    Receiver(int max, RConfig rConfig) {
         this.max = max;
+        queueName = rConfig.getQueueName();
+        host = rConfig.getHost();
+        login = rConfig.getLogin();
+        setName = rConfig.getSetName();
+        address = rConfig.getAddress();
+        password = rConfig.getPassword();
     }
 
     private void init() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(HOST);
-        factory.setUsername(LOGIN);
-        factory.setPassword(PASSWORD);
+        factory.setHost(host);
+        factory.setUsername(login);
+        factory.setPassword(password);
         connection = factory.newConnection();
         channel = connection.createChannel();
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        channel.queueDeclare(queueName, false, false, false, null);
 
         Config config = new Config();
         config.useSingleServer()
-                .setAddress(ADDRESS)
-                .setPassword(PASSWORD)
+                .setAddress(address)
+                .setPassword(password)
                 .setDatabase(0);
         this.client = Redisson.create(config);
-        this.set = client.getScoredSortedSet(SET_NAME);
+        this.set = client.getScoredSortedSet(setName);
         RReadWriteLock rwlock = client.getReadWriteLock("setLock");
-        set.clear();
 
-        handler = new Handler(channel, QUEUE_NAME, SET_NAME, set, rwlock);
+        handler = new Handler(channel, queueName, setName, set, rwlock);
 
         System.out.print("[o] Receiver is initialized\n");
     }
 
     private void receive() {
         try {
-            channel.basicConsume(QUEUE_NAME, true, handler);
+            channel.basicConsume(queueName, true, handler);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void exit() throws IOException, TimeoutException {
-        try {
-            Thread.sleep(3000); //сорри.
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.print(String.format("[^] Printing the contents of the redis set '%s':\n", SET_NAME));
-        set.readAll().forEach(System.out::println);
-
         channel.close();
         connection.close();
         client.shutdown();
