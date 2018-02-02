@@ -16,8 +16,8 @@ public class ConnectionProvider {
     private String login;
     private String password;
 
-    public ConnectionProvider() {
-
+    public ConnectionProvider() throws IOException, TimeoutException {
+        initDefault();
     }
 
     public void init() throws IOException, TimeoutException {
@@ -32,12 +32,7 @@ public class ConnectionProvider {
         this.host = "localhost";
         this.login = "msxfusr";
         this.password = "msxfpwd";
-
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(host);
-        factory.setUsername(login);
-        factory.setPassword(password);
-        connection = factory.newConnection();
+        init();
     }
 
     public void exit() throws IOException {
