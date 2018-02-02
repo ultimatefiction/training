@@ -32,7 +32,7 @@ public class Absorber extends Thread {
     }
 
     private void exit() {
-        set.clear();
+        //set.clear();
         client.shutdown();
         System.out.print("[x] Redis reader is finished working\n");
     }
