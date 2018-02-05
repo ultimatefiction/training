@@ -10,9 +10,9 @@ public class Starter {
 
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
 
-        int maxMessages = 50;
+        int maxMessages = 20;
         int sendersCount = 5;
-        int cooldownTime = 5000;
+        int cooldownTime = 1000;
         String queueName = "postbox";
         String setName = "letters";
         ConnectionProvider connectionProvider = new ConnectionProvider();
