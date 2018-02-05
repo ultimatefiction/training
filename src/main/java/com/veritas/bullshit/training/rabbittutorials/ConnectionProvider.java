@@ -44,7 +44,10 @@ public class ConnectionProvider {
     }
 
     public Channel getChannel() throws IOException {
-        return connection.createChannel();
+        Channel channel = connection.createChannel();
+        int prefetchCount = 1;
+        channel.basicQos(prefetchCount);
+        return channel;
     }
 
     public String getQueueName() {

@@ -12,6 +12,12 @@ public class Data implements Serializable{
         this.score = score;
     }
 
+    Data(String input) {
+        String[] parts = input.split(" ");
+        this.score = Integer.parseInt(parts[0]);
+        this.name = parts[1];
+    }
+
     public String getName() {
         return name;
     }

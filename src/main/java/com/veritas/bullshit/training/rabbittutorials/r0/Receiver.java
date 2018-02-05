@@ -15,7 +15,7 @@ public class Receiver extends Thread{
     private Channel channel;
     private RedissonClient client;
 
-    public Receiver(String queueName, String setName, Channel channel, RedissonClient client) {
+    Receiver(String queueName, String setName, Channel channel, RedissonClient client) {
         this.queueuName = queueName;
         this.setName = setName;
         this.channel = channel;
